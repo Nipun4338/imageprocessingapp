@@ -1,7 +1,7 @@
 # Basic Image Processing App
 
-Used:
-i) Skimage Library
+Used:<br>
+i) Skimage Library<br>
 ii) Tkinter Library
 
 ![](ipapp.gif)
