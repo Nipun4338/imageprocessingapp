@@ -7,3 +7,5 @@ ii) Tkinter Library(for gui)
 Face Detection and other operations depend on the value of parameters.
 
 ![](ipapp.gif)
+
+Detailed Video: https://www.youtube.com/watch?v=hIVjVLJB59U
