@@ -25,7 +25,14 @@ import os
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from skimage.restoration import inpaint
-
+from skimage.feature import Cascade
+from skimage import data
+from skimage.segmentation import slic
+from  skimage.color import label2rgb
+from skimage.filters import gaussian
+from skimage import io
+from skimage.feature import Cascade
+from skimage import data
 
 image1=''
 class Root(Tk):
@@ -37,8 +44,8 @@ class Root(Tk):
         os.chdir(dir_path)
         self.bold_font = Font(family="Helvetica", size=14, weight="bold")
         self.title("Python Image Processing")
-        self.minsize(1350, 700)
-        self.maxsize(1350, 700)
+        self.minsize(850, 300)
+        self.maxsize(850, 300)
         self.labelFrame = ttk.Label(self, text = "Open File:", font=('Impact', -20), bg='#000', fg='#fff')
         self.labelFrame.grid(column = 0, row = 2, padx = 20, pady = 20)
         self.configure(background='#263D42')
@@ -63,7 +70,44 @@ class Root(Tk):
         self.bilateral()
         self.slic()
         self.contour()
+        self.normalcanny()
+        self.controlcanny()
+        self.corner()
+        self.face()
+        self.slicface()
+        self.faceblur()
 
+
+
+    def faceblur(self):
+            self.faceblur= ttk.Button(self, text = "Face Detection make blur",command = self.showfaceblur)
+            self.faceblur.configure(background='#e28743')
+            self.faceblur.grid(column = 4, row = 3)
+
+    def slicface(self):
+            self.slicface= ttk.Button(self, text = "Face Detection with segmentation",command = self.showslicface)
+            self.slicface.configure(background='#e28743')
+            self.slicface.grid(column = 3, row = 8)
+
+    def face(self):
+            self.face= ttk.Button(self, text = "Face Detection",command = self.showface)
+            self.face.configure(background='#e28743')
+            self.face.grid(column = 3, row = 7)
+
+    def corner(self):
+            self.corner= ttk.Button(self, text = "Corner(harris)",command = self.showcorner)
+            self.corner.configure(background='#e28743')
+            self.corner.grid(column = 3, row = 6)
+
+    def controlcanny(self):
+            self.controlcanny= ttk.Button(self, text = "Edge Canny(sigma)",command = self.showcontrolcanny)
+            self.controlcanny.configure(background='#e28743')
+            self.controlcanny.grid(column = 3, row = 5)
+
+    def normalcanny(self):
+            self.normalcanny= ttk.Button(self, text = "Edge Canny(normal)",command = self.shownormalcanny)
+            self.normalcanny.configure(background='#e28743')
+            self.normalcanny.grid(column = 3, row = 4)
 
     def contour(self):
             self.contour= ttk.Button(self, text = "Contour(show)",command = self.showcontour)
@@ -538,6 +582,203 @@ class Root(Tk):
         s={len(contours) - 4}
         show_image_contour(binary_global, contours,s)
 
+
+
+    def shownormalcanny(self):
+        from skimage.feature import canny
+
+        # Import the label2rgb function from color module
+        from  skimage.color import label2rgb
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = mpimg.imread(image1)
+        # Make the image grayscale
+        image = color.rgb2gray(image)
+        canny_edges = canny(image)
+        # Show resulting image
+        show_image(canny_edges, "Edges with Canny")
+
+    def showcontrolcanny(self):
+        from skimage.feature import canny
+
+        # Import the label2rgb function from color module
+        from  skimage.color import label2rgb
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = mpimg.imread(image1)
+        # Make the image grayscale
+        image = color.rgb2gray(image)
+        # Apply canny edge detector with a sigma of 1.8
+        canny_edges = canny(image, sigma=1.8)
+        # Show resulting image
+        show_image(canny_edges, "Edges with Canny")
+
+
+    def showcorner(self):
+        # Import the corner detector related functions and module
+        from skimage.feature import corner_harris, corner_peaks
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = mpimg.imread(image1)
+        # Convert image from RGB-3 to grayscale
+        building_image_gray = color.rgb2gray(image)
+        # Apply the detector  to measure the possible corners
+        measure_image = corner_harris(building_image_gray)
+        # Find the peaks of the corners using the Harris detector
+        coords = corner_peaks(measure_image, min_distance=10)
+        # Show original and resulting image with corners detected
+        s=len(coords)
+        show_image_with_corners(image, coords,s)
+
+
+    def showface(self):
+        # Import the corner detector related functions and module
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = mpimg.imread(image1)
+        # Load the trained file from data
+        trained_file = data.lbp_frontal_face_cascade_filename()
+
+        # Initialize the detector cascade
+        detector = Cascade(trained_file)
+
+        # Detect faces with min and max size of searching window
+        detected = detector.detect_multi_scale(img = image,
+                                               scale_factor=1.2,
+                                               step_ratio=1,
+                                               min_size=(10,10),
+                                               max_size=(200,200))
+
+        # Show the detected faces
+        show_detected_face(image, detected)
+
+
+    def showslicface(self):
+        # Import the corner detector related functions and modul
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = io.imread(image1)
+        # Load the trained file from data
+        trained_file = data.lbp_frontal_face_cascade_filename()
+
+        # Initialize the detector cascade
+        detector = Cascade(trained_file)
+        segments = slic(image, n_segments=100)
+        segmented_selfie = color.label2rgb(segments, image, kind='avg')
+
+        # Detect faces with min and max size of searching window
+        detected = detector.detect_multi_scale(img = segmented_selfie,
+                                               scale_factor=1.2,
+                                               step_ratio=1,
+                                               min_size=(10,10),
+                                               max_size=(1000,1000))
+
+        # Show the detected faces
+        show_detected_face(segmented_selfie, detected)
+
+
+
+
+    def showfaceblur(self):
+        # Import the corner detector related functions and modul
+        image1=""
+        file="imageprocessing.csv"
+        with open(file, 'r',) as file:
+            reader = csv.reader(file, delimiter = '\t')
+            for row in reader:
+                image1=row[0]
+                break
+        image = io.imread(image1)
+        # Load the trained file from data
+        trained_file = data.lbp_frontal_face_cascade_filename()
+
+        # Initialize the detector cascade
+        detector = Cascade(trained_file)
+        detected = detector.detect_multi_scale(
+            img=image,
+            scale_factor=1.2,
+            step_ratio=1,
+            min_size=(50, 50),
+            max_size=(100, 100)
+        )
+        for detected_face in detected:
+            face = get_face(image, detected_face)
+            blurred_face = gaussian(face, multichannel=True, sigma=10)
+            show_image(face)
+            resulting_image = merge_blurry_face(image, detected_face, blurred_face)
+        show_image(resulting_image, "Blurred faces")
+
+
+from matplotlib import patches
+
+
+def get_face(image, detected_face):
+    x_from, y_from = detected_face['r'], detected_face['c']
+    x_to = x_from + detected_face['width']
+    y_to = y_from + detected_face['height']
+    face = image[x_from:x_to, y_from:y_to]
+    return face
+
+def merge_blurry_face(original, detected_face, gaussian_face):
+    x_from, y_from = detected_face['r'], detected_face['c']
+    x_to = x_from + detected_face['width']
+    y_to = y_from + detected_face['height']
+    original[x_from:x_to, y_from:y_to] = 255 * gaussian_face
+    return original
+
+def show_detected_face(result, detected, title="Face image"):
+    plt.figure(figsize=(8, 12))
+    plt.imshow(result)
+    img_desc = plt.gca()
+    plt.set_cmap('gray')
+    plt.title(title)
+    plt.axis('off')
+
+    for patch in detected:
+        img_desc.add_patch(
+            patches.Rectangle(
+                (patch['c'], patch['r']),
+                patch['width'],
+                patch['height'],
+                fill=False,color='r',linewidth=2
+            )
+        )
+
+    plt.show()
+
+def show_image_with_corners(image, coords,s, title="Corners detected"):
+    plt.figure(figsize=(8, 12))
+    plt.imshow(image, interpolation='nearest', cmap='gray')
+    plt.title(title)
+    plt.plot(coords[:, 1], coords[:, 0], '+r', markersize=15)
+    plt.axis('off')
+    plt.text(0,0,s)
+    plt.show()
 
 
 def show_image(image, title='Image', cmap_type='gray'):
