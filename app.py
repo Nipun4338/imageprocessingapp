@@ -21,16 +21,10 @@ from skimage.filters import sobel
 from skimage.filters import gaussian
 from skimage import exposure
 from skimage import morphology
-import os
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from skimage.restoration import inpaint
-from skimage.feature import Cascade
-from skimage import data
-from skimage.segmentation import slic
 from  skimage.color import label2rgb
-from skimage.filters import gaussian
-from skimage import io
 from skimage.feature import Cascade
 from skimage import data
 
@@ -530,9 +524,6 @@ class Root(Tk):
 
 
     def slicsegmentation(self):
-        # Import the slic function from segmentation module
-        from skimage.segmentation import slic
-
         # Import the label2rgb function from color module
         from  skimage.color import label2rgb
         image1=""
