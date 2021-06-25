@@ -3,7 +3,7 @@
 ## Used:<br>
 Tkinter, PIL, Matplotlib, Skimage, Numpy
 
-Face Detection and other operations depend on the value of parameters.
+Face Detection and other operations depends on the value of parameters.
 
 ![](ipapp.gif)
 
